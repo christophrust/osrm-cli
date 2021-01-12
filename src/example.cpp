@@ -10,6 +10,7 @@
 
 #include "osrm/osrm.hpp"
 #include "osrm/status.hpp"
+#include <boost/algorithm/string.hpp>
 
 #include <exception>
 #include <iostream>
@@ -18,6 +19,73 @@
 
 #include <cstdlib>
 
+
+using namespace osrm;
+
+int route_osrm(double lon1, double lat1, double lon2, double lat2, const OSRM * osrm){
+
+    RouteParameters params;
+
+    //
+    params.coordinates.push_back({util::FloatLongitude{lon1}, util::FloatLatitude{lat1}});
+    params.coordinates.push_back({util::FloatLongitude{lon2}, util::FloatLatitude{lat2}});
+
+    // Response is in JSON format
+    engine::api::ResultT result = json::Object();
+
+    // Execute routing request, this does the heavy lifting
+    const auto status = osrm->Route(params, result);
+
+    auto &json_result = result.get<json::Object>();
+    if (status == Status::Ok)
+        {
+            auto &routes = json_result.values["routes"].get<json::Array>();
+
+            // Let's just use the first route
+            auto &route = routes.values.at(0).get<json::Object>();
+            const auto distance = route.values["distance"].get<json::Number>().value;
+            const auto duration = route.values["duration"].get<json::Number>().value;
+
+            // Warn users if extract does not contain the default coordinates from above
+            if (distance == 0 || duration == 0)
+                {
+                    std::cout << "Note: distance or duration is zero. ";
+                    std::cout << "You are probably doing a query outside of the OSM extract.\n\n";
+                }
+
+            std::cout << "Distance: " << distance << " meter\n";
+            std::cout << "Duration: " << duration << " seconds\n";
+            return 0;
+        }
+    else if (status == Status::Error)
+        {
+            const auto code = json_result.values["code"].get<json::String>().value;
+            const auto message = json_result.values["message"].get<json::String>().value;
+
+            std::cout << "Code: " << code << "\n";
+            std::cout << "Message: " << code << "\n";
+            return 1;
+        }
+
+}
+
+
+
+// std::vector<std::string> parse_line(const std::string& str, double & latlon){
+//     // std::cout << str << std::endl;
+
+//     std::vector<std::string> strs;
+
+//     boost::split(strs, str, boost::is_any_of(";"));
+
+//     // std::cout << strs[0] << std::endl;
+
+//     return strs;
+//     // std::cout << std::stod(strs[1])  << std::endl;
+// }
+
+
+
 int main(int argc, const char *argv[])
 {
     if (argc < 2)
@@ -25,8 +93,6 @@ int main(int argc, const char *argv[])
         std::cerr << "Usage: " << argv[0] << " data.osrm\n";
         return EXIT_FAILURE;
     }
-
-    using namespace osrm;
 
     // Configure based on a .osrm base path, and no datasets in shared mem from osrm-datastore
     EngineConfig config;
@@ -45,51 +111,52 @@ int main(int argc, const char *argv[])
     const OSRM osrm{config};
 
     // The following shows how to use the Route service; configure this service
-    RouteParameters params;
 
-    double lon1 = 11.0754048;
-    double lat1 = 49.6635;
-    double lon2 = 11.2754048;
-    double lat2 = 49.3635;
+    std::ifstream in(argv[2]);
 
-    // Route in monaco
-    params.coordinates.push_back({util::FloatLongitude{lon1}, util::FloatLatitude{lat1}});
-    params.coordinates.push_back({util::FloatLongitude{lon2}, util::FloatLatitude{lat2}});
+    std::string str;
+    std::vector<std::string> strs;
 
-    // Response is in JSON format
-    engine::api::ResultT result = json::Object();
 
-    // Execute routing request, this does the heavy lifting
-    const auto status = osrm.Route(params, result);
+    double lat_src, lon_src, lat_dst, lon_dst;
+    double lat1, lon1, lat2, lon2;
+    int ret;
 
-    auto &json_result = result.get<json::Object>();
-    if (status == Status::Ok)
-    {
-        auto &routes = json_result.values["routes"].get<json::Array>();
+    while (std::getline(in, str)) {
 
-        // Let's just use the first route
-        auto &route = routes.values.at(0).get<json::Object>();
-        const auto distance = route.values["distance"].get<json::Number>().value;
-        const auto duration = route.values["duration"].get<json::Number>().value;
+        //parse_line(str);
 
-        // Warn users if extract does not contain the default coordinates from above
-        if (distance == 0 || duration == 0)
-        {
-            std::cout << "Note: distance or duration is zero. ";
-            std::cout << "You are probably doing a query outside of the OSM extract.\n\n";
+        boost::split(strs, str, boost::is_any_of(";"));
+
+        lon_src = std::stod(strs[1]);
+        lat_src = std::stod(strs[2]);
+        lon_dst = std::stod(strs[3]);
+        lat_dst = std::stod(strs[4]);
+
+        ret = route_osrm(lon_src, lat_src, lon_dst, lat_dst, &osrm);
+        if (ret) {
+            return EXIT_FAILURE;
         }
 
-        std::cout << "Distance: " << distance << " meter\n";
-        std::cout << "Duration: " << duration << " seconds\n";
-        return EXIT_SUCCESS;
     }
-    else if (status == Status::Error)
-    {
-        const auto code = json_result.values["code"].get<json::String>().value;
-        const auto message = json_result.values["message"].get<json::String>().value;
 
-        std::cout << "Code: " << code << "\n";
-        std::cout << "Message: " << code << "\n";
-        return EXIT_FAILURE;
-    }
+
+    // for (int i=0; i < 10; i++){
+
+    //     lon1 = 11.0154048;
+    //     lat1 = 49.6635;
+    //     lon2 = 11.2754048;
+    //     lat2 = 49.3635;
+
+    //     ret = route_osrm(lon1, lat1, lon2, lat2, &osrm);
+
+    //     if (ret) {
+    //         return EXIT_FAILURE;
+    //     }
+
+    // }
+
+    return EXIT_SUCCESS;
+
+
 }
