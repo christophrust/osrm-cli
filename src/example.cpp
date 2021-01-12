@@ -22,7 +22,7 @@
 
 using namespace osrm;
 
-int route_osrm(double lon1, double lat1, double lon2, double lat2, const OSRM * osrm){
+void route_osrm(double lon1, double lat1, double lon2, double lat2, const OSRM * osrm){
 
     RouteParameters params;
 
@@ -39,32 +39,38 @@ int route_osrm(double lon1, double lat1, double lon2, double lat2, const OSRM * 
     auto &json_result = result.get<json::Object>();
     if (status == Status::Ok)
         {
-            auto &routes = json_result.values["routes"].get<json::Array>();
 
-            // Let's just use the first route
+            // get first route
+            auto &routes = json_result.values["routes"].get<json::Array>();
             auto &route = routes.values.at(0).get<json::Object>();
             const auto distance = route.values["distance"].get<json::Number>().value;
             const auto duration = route.values["duration"].get<json::Number>().value;
 
-            // Warn users if extract does not contain the default coordinates from above
-            if (distance == 0 || duration == 0)
-                {
-                    std::cout << "Note: distance or duration is zero. ";
-                    std::cout << "You are probably doing a query outside of the OSM extract.\n\n";
-                }
+            // and distance from input coordinates to waypoints
+            auto &waypoints = json_result.values["waypoints"].get<json::Array>();
+            auto &waypoint1 = waypoints.values.at(0).get<json::Object>();
+            auto &waypoint2 = waypoints.values.at(1).get<json::Object>();
+            const auto d1 = waypoint1.values["distance"].get<json::Number>().value;
+            const auto d2 = waypoint2.values["distance"].get<json::Number>().value;
 
-            std::cout << "Distance: " << distance << " meter\n";
-            std::cout << "Duration: " << duration << " seconds\n";
-            return 0;
+            // write out
+            std::cout << distance << ";" << duration << ";" << d1 << ";" << d2 << std::endl;
+
+
+            // std::cout << "Distance: " << distance << " meter\n";
+            // std::cout << "Duration: " << duration << " seconds\n";
+           // return 0;
         }
     else if (status == Status::Error)
         {
             const auto code = json_result.values["code"].get<json::String>().value;
             const auto message = json_result.values["message"].get<json::String>().value;
 
-            std::cout << "Code: " << code << "\n";
-            std::cout << "Message: " << code << "\n";
-            return 1;
+            std::cout << "NA;NA;NA;NA" << std::endl;
+
+            //std::cout << "Code: " << code << "\n";
+            //std::cout << "Message: " << code << "\n";
+            //return 1;
         }
 
 }
@@ -122,6 +128,8 @@ int main(int argc, const char *argv[])
     double lat1, lon1, lat2, lon2;
     int ret;
 
+    std::cout << "ID;distance;duration;d1;d2" << std::endl;
+
     while (std::getline(in, str)) {
 
         //parse_line(str);
@@ -133,10 +141,9 @@ int main(int argc, const char *argv[])
         lon_dst = std::stod(strs[3]);
         lat_dst = std::stod(strs[4]);
 
-        ret = route_osrm(lon_src, lat_src, lon_dst, lat_dst, &osrm);
-        if (ret) {
-            return EXIT_FAILURE;
-        }
+        std::cout << strs[0] << ";";
+
+        route_osrm(lon_src, lat_src, lon_dst, lat_dst, &osrm);
 
     }
 
