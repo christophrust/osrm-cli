@@ -8,7 +8,7 @@ I tested this on Linux, on Mac it should also be possible to build it using the 
 
 ## Dependencies
 
-The same dependencies are necessary as for building the OSRM toolchain. 
+The same dependencies are necessary as for building the OSRM toolchain and libosrm. 
 
 ## Building
 
