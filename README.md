@@ -1,6 +1,6 @@
 # OSRM CLI program
 
-This is a (simple) CLI program to perform many routings using the `libosrm`, the c++ library of the OpenSourceRoutingMachine (OSRM).
+This is a (simple) CLI program to perform many routings using `libosrm`, the c++ library of the OpenSourceRoutingMachine (OSRM).
 
 It can be used to compute shortest routes for many pairs where using the http-API has a too large overhead.
 
@@ -8,7 +8,7 @@ I tested this on Linux, on Mac it should also be possible to build it using the 
 
 ## Dependencies
 
-The same dependencies are necessary as for building the OSRM toolchain and libosrm. 
+The same dependencies are necessary as for building the OSRM toolchain, plus libosrm.
 
 ## Building
 
