@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-project(osrm-example C CXX)
+project(osrm-cli C CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -27,10 +27,10 @@ if(WIN32 AND MSVC_VERSION LESS 1900)
 endif()
 
 link_directories(${LibOSRM_LIBRARY_DIRS})
-add_executable(osrm-example example.cpp)
+add_executable(osrm-cli osrm-cli.cpp)
 
 find_package(LibOSRM REQUIRED)
 
-target_link_libraries(osrm-example ${LibOSRM_LIBRARIES} ${LibOSRM_DEPENDENT_LIBRARIES})
+target_link_libraries(osrm-cli ${LibOSRM_LIBRARIES} ${LibOSRM_DEPENDENT_LIBRARIES})
 include_directories(SYSTEM ${LibOSRM_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LibOSRM_CXXFLAGS}")
