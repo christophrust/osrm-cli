@@ -27,3 +27,7 @@ osrm-cli /path/to/prepared/map.osrm latlon-pairs.csv
 ```
 
 Make sure, that libosrm is in your PATH or make your current terminal session aware of its location using LD_LIBRARY_PATH.
+
+The CSV file must have five columns, seperated by a semicolon \(`;`\) and no column names. The first column is an identifier, the second and third column are longitude and latitude of origin location and the fourth and fifth column are longitude and latitude of the destination location. The input must not have column names in its first line.
+
+The utility sends its result (which is again a CSV file with `;` as seperator ) to `stdout`. The output also has five columns. The first one is the id, the second is distance in meters, the third duration in seconds, the fourth/fifth give the distance between origin/destination location and the closest point on the road graph.
