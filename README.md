@@ -8,7 +8,7 @@ I tested this on Linux, on Mac it should also be possible to build it using the 
 
 ## Dependencies
 
-The same dependencies are necessary as for building the OSRM toolchain, plus libosrm. So for instance running
+The same dependencies are necessary as for [building the OSRM toolchain](https://github.com/Project-OSRM/osrm-backend/wiki/Building-OSRM), plus libosrm. So for instance running
 ``` sh
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
 cmake --build .
