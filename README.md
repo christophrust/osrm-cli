@@ -11,7 +11,8 @@ I tested this on Linux, on Mac it should also be possible to build it using the 
 The same dependencies are necessary as for building the OSRM toolchain, plus libosrm. So for instance running
 ``` sh
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
-cmake --build . && cmake --build . --target install
+cmake --build .
+cmake --build . --target install
 ```
 will build OSRM and libosrm and place binaries and libosrm in the respective system directories.
 
